@@ -10,6 +10,28 @@ module YamlDb
         @io = StringIO.new
       end
 
+      context "with Apartment multi-tenancy" do
+        before(:each) do
+          allow(Load).to receive(:load_documents)
+          class_double('Apartment').as_stubbed_const
+          @tenant_klass = class_double('Apartment::Tenant').as_stubbed_const
+          @old_env = ENV['TENANT']
+        end
+        after(:each) do
+          ENV['TENANT'] = @old_env
+        end
+        it "switches to tenant if ENV[TENANT] set" do
+          tenant_name = 'tenant-23'
+          ENV['TENANT'] = tenant_name
+          expect(@tenant_klass).to receive(:switch!).with(tenant_name)
+          Load.load(@io)
+        end
+        it "does not explicitly switch tenants if ENV[TENANT] is not set" do
+          ENV.delete('TENANT')
+          expect(@tenant_klass).not_to receive(:switch!)
+        end
+      end
+
       it "truncates the table" do
         allow(ActiveRecord::Base.connection).to receive(:execute).with("TRUNCATE mytable").and_return(true)
         expect(ActiveRecord::Base.connection).not_to receive(:execute).with("DELETE FROM mytable")

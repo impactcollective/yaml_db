@@ -16,6 +16,27 @@ module YamlDb
         @io = StringIO.new
       end
 
+      context "with Apartment multi-tenancy" do
+        before(:each) do
+          class_double('Apartment').as_stubbed_const
+          @tenant_klass = class_double('Apartment::Tenant').as_stubbed_const
+          @old_env = ENV['TENANT']
+        end
+        after(:each) do
+          ENV['TENANT'] = @old_env
+        end
+        it "explicitly sets tenant before extracting tables if ENV['TENANT'] set" do
+          tenant_name = 'tenant-33'
+          ENV['TENANT'] = tenant_name
+          expect(@tenant_klass).to receive(:switch!).with(tenant_name)
+          Dump.tables
+        end
+        it "does not explicitly set tenant if ENV['TENANT'] not set" do
+          ENV.delete('TENANT')
+          expect(@tenant_klass).not_to receive(:switch!)
+          Dump.tables
+        end
+      end
       it "returns a list of column names" do
         expect(Dump.table_column_names('mytable')).to eq([ 'a', 'b' ])
       end

@@ -59,6 +59,9 @@ module YamlDb
 
     class Load
       def self.load(io, truncate = true)
+        if defined?(Apartment::Tenant) && ENV['TENANT']
+          Apartment::Tenant.switch! ENV['TENANT']
+        end
         ActiveRecord::Base.connection.transaction do
           load_documents(io, truncate)
         end
@@ -165,6 +168,9 @@ module YamlDb
       end
 
       def self.tables
+        if defined?(Apartment::Tenant) && ENV['TENANT']
+          Apartment::Tenant.switch! ENV['TENANT']
+        end
         ActiveRecord::Base.connection.tables.reject { |table| ['schema_info', 'schema_migrations'].include?(table) }.sort
       end
 
