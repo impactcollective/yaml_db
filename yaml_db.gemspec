@@ -22,7 +22,7 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency "rails", ">= 3.0", "< 6.1.0"
   s.add_runtime_dependency "rake", ">= 0.8.7"
 
-  s.add_development_dependency "bundler", "~> 2.1.4"
+  s.add_development_dependency "bundler", ">= 2.0"
   s.add_development_dependency "rspec", "~> 3.0"
   s.add_development_dependency "sqlite3", "~> 1.3"
 end
